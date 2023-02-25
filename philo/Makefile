@@ -6,7 +6,7 @@
 #    By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/13 13:54:20 by ybenlafk          #+#    #+#              #
-#    Updated: 2023/02/16 21:29:45 by ybenlafk         ###   ########.fr        #
+#    Updated: 2023/02/25 19:05:07 by ybenlafk         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,9 +18,8 @@ SRCS= strjoin.c utilis.c ft_split.c parsing.c \
 		routine.c	main.c
 
 OBGJ= $(SRCS:.c=.o)
-CC = cc
-CFLAGS = 
-# CFLAGS = -Wall -Wextra -Werror
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -fsanitize=thread -g
 FRM = rm -rf
 
 all: $(NAME)

@@ -4,63 +4,77 @@
 #include <unistd.h>
 
 #define NUM_PHILOSOPHERS 5
+#define EAT_TIME_MS 5000 // 5 seconds
 
-typedef struct {
-  int id;
-  pthread_mutex_t *left_fork;
-  pthread_mutex_t *right_fork;
-} philo;
+pthread_mutex_t forks[NUM_PHILOSOPHERS];
 
-void *routine(void *arg) {
-  philo *p = (philo *)arg;
-  while (1) {
-    // philosopher thinks
-    printf("Philosopher %d is thinking\n", p->id);
-    // philosopher picks up left fork
-    pthread_mutex_lock(p->left_fork);
-    printf("Philosopher %d picks up left fork\n", p->id);
+void* philosopher(void* arg) {
+    int id = *((int*)arg);
+    int left_fork = id;
+    int right_fork = (id + 1) % NUM_PHILOSOPHERS;
+    int has_eaten = 0;
+    while (1) {
+        // Think for a while
+        printf("Philosopher %d is thinking\n", id);
+        sleep(rand() % 5);
 
-    // philosopher picks up right fork
-    pthread_mutex_lock(p->right_fork);
-    printf("Philosopher %d picks up right fork\n", p->id);
+        // Pick up left fork
+        pthread_mutex_lock(&forks[left_fork]);
+        printf("Philosopher %d picked up left fork %d\n", id, left_fork);
 
-    // philosopher eats
-    printf("Philosopher %d is eating\n", p->id);
-    sleep(1);
+        // Pick up right fork
+        pthread_mutex_lock(&forks[right_fork]);
+        printf("Philosopher %d picked up right fork %d\n", id, right_fork);
 
-    // philosopher puts down right fork
-    pthread_mutex_unlock(p->right_fork);
-    printf("Philosopher %d puts down right fork\n", p->id);
+        // Eat for a while
+        printf("Philosopher %d is eating\n", id);
+        usleep(1 * 1000);
+        has_eaten = 1;
 
-    // philosopher puts down left fork
-    pthread_mutex_unlock(p->left_fork);
-    printf("Philosopher %d puts down left fork\n", p->id);
+        // Put down right fork
+        pthread_mutex_unlock(&forks[right_fork]);
+        printf("Philosopher %d put down right fork %d\n", id, right_fork);
 
-    // philosopher sleeps
-    printf("Philosopher %d is sleeping\n", p->id);
-    sleep(1);
-  }
+        // Put down left fork
+        pthread_mutex_unlock(&forks[left_fork]);
+        printf("Philosopher %d put down left fork %d\n", id, left_fork);
+
+        // Check if philosopher has eaten for long enough
+        if (has_eaten || (rand() % 2 == 0)) {
+            printf("Philosopher %d has finished eating and died\n", id);
+            return NULL;
+        }
+    }
 }
 
 int main() {
-  pthread_t threads[NUM_PHILOSOPHERS];
-  pthread_mutex_t forks[NUM_PHILOSOPHERS];
-  philo philos[NUM_PHILOSOPHERS];
-  int i;
-  for (i = 0; i < NUM_PHILOSOPHERS; i++) {
-    pthread_mutex_init(&forks[i], NULL);
-  }
-  for (i = 0; i < NUM_PHILOSOPHERS; i++) {
-    philos[i].id = i;
-    philos[i].left_fork = &forks[i];
-    philos[i].right_fork = &forks[(i + 1) % NUM_PHILOSOPHERS];
-    pthread_create(&threads[i], NULL, routine, (void *)&philos[i]);
-  }
-  for (i = 0; i < NUM_PHILOSOPHERS; i++) {
-    pthread_join(threads[i], NULL);
-  }
-  for (i = 0; i < NUM_PHILOSOPHERS; i++) {
-    pthread_mutex_destroy(&forks[i]);
-  }
-  return 0;
+    pthread_t philosophers[NUM_PHILOSOPHERS];
+    int philosopher_ids[NUM_PHILOSOPHERS];
+
+    // Initialize mutexes
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        pthread_mutex_init(&forks[i], NULL);
+    }
+
+    // Start philosopher threads
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        philosopher_ids[i] = i;
+        pthread_create(&philosophers[i], NULL, philosopher, &philosopher_ids[i]);
+    }
+
+    // Sleep for 200 ms before checking if any philosophers have died
+    usleep(200000);
+
+    // Check if any philosophers have died
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        void* result;
+        pthread_join(philosophers[i], &result);
+    }
+
+    // Clean up mutexes
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        pthread_mutex_destroy(&forks[i]);
+    }
+
+    return 0;
 }

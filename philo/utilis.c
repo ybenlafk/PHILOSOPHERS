@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 15:27:29 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/02/16 21:29:04 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/02/25 19:01:19 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,3 +60,11 @@ long long	get_time()
 	long long ms = (long long) tv.tv_sec * 1000 + (long long) tv.tv_usec / 1000;
 	return (ms);
 }
+
+int	is_death(philo *philos, t_src *src)
+{
+	if (((get_time()) - philos->vars->time_after_eat) >= src->time_to_die)	
+		return (1);
+	return (0);
+}
+
