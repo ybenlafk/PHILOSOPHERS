@@ -6,48 +6,56 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 16:01:19 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/02/26 23:48:03 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:09:27 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	the_rest(t_philo *philos)
+void	writeline(t_philo *philos, char *s)
 {
+	pthread_mutex_t	lock;
+
+	pthread_mutex_init(&lock, NULL);
 	pthread_mutex_lock(&philos->vars->lock);
-	printf("%lld %d is sleeping\n", get_time() - philos->vars->time, philos->id);
-	ft_usleep(philos->src->time_to_sleep); 
-	philos->ok = 0;
-	if (philos->is)
-		pthread_mutex_unlock(&philos->vars->lock);
-	pthread_mutex_lock(&philos->vars->lock);
-	printf("%lld %d is thinking\n", get_time() - philos->vars->time, philos->id);
-	if (philos->is)
-		pthread_mutex_unlock(&philos->vars->lock);
+	printf("%lld %d %s\n",
+		get_time() - philos->vars->time, philos->id, s);
+	pthread_mutex_unlock(&philos->vars->lock);
+	pthread_mutex_destroy(&lock);
 }
 
-void	lock_forks(t_philo *philos)
-{
-	pthread_mutex_lock(philos->fork_one);
-	pthread_mutex_lock(philos->fork_two);
-	pthread_mutex_lock(&philos->vars->lock);
-	printf("%lld %d has taken a fork\n",
-		get_time() - philos->vars->time, philos->id);
-	printf("%lld %d has taken a fork\n",
-		get_time() - philos->vars->time, philos->id);
-	pthread_mutex_unlock(&philos->vars->lock);
+void	locked_msg(t_philo *philos, int stat)
+{	
+	if (!stat)
+		writeline(philos, "has taken a fork");
+	else if (stat == 1)
+	{
+		writeline(philos, "is eating");
+		pthread_mutex_lock(&philos->vars->lock);
+		philos->time_after_eat = get_time();
+		pthread_mutex_unlock(&philos->vars->lock);
+	}
+	else if (stat == 2)
+		writeline(philos, "is sleeping");
+	else if (stat == 3)
+		writeline(philos, "is thinking");
 }
 
-void	unlock_forks(t_philo *philos)
+void	lock_forks(t_philo *philo)
 {
-	pthread_mutex_lock(&philos->vars->lock);
-	printf("%lld %d is eating\n", get_time() - philos->vars->time, philos->id);
-	philos->ok = 1;
-	pthread_mutex_unlock(&philos->vars->lock);
-	philos->time_after_eat = get_time();
-	ft_usleep(philos->src->time_to_eat);
-	pthread_mutex_unlock(philos->fork_one);
-	pthread_mutex_unlock(philos->fork_two);
+	pthread_mutex_lock(&philo->fork);
+	locked_msg(philo, 0);
+	pthread_mutex_lock(&philo->next->fork);
+	locked_msg(philo, 0);
+}
+
+void	unlock_forks(t_philo *philo)
+{
+	if (philo->ok)
+	{
+		pthread_mutex_unlock(&philo->fork);
+		pthread_mutex_unlock(&philo->next->fork);
+	}
 }
 
 void	*routine(void *param)
@@ -57,21 +65,20 @@ void	*routine(void *param)
 	if (!param)
 		return (NULL);
 	philos = (t_philo *)param;
-	while (philos->is)
+	pthread_mutex_lock(&philos->vars->lss);
+	while (philos->ok)
 	{
+		pthread_mutex_unlock(&philos->vars->lss);
 		if (!(philos->id % 2))
 			usleep(100);
 		lock_forks(philos);
+		locked_msg(philos, 1);
+		ft_usleep(philos->src->time_to_eat);
 		unlock_forks(philos);
-		if (philos->eat_mode)
-		{
-			pthread_mutex_lock(&philos->vars->lock);
-			philos->eat_count++;
-			if (philos->eat_count == philos->src->times_philos_must_eat)
-			philos->vars->rep++;
-			pthread_mutex_unlock(&philos->vars->lock);
-		}
-		the_rest(philos);
+		eat_counter(philos);
+		locked_msg(philos, 2);
+		ft_usleep(philos->src->time_to_sleep);
+		locked_msg(philos, 3);
 	}
 	return (NULL);
 }

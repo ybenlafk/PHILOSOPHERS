@@ -6,7 +6,7 @@
 #    By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/13 13:54:20 by ybenlafk          #+#    #+#              #
-#    Updated: 2023/02/26 23:40:50 by ybenlafk         ###   ########.fr        #
+#    Updated: 2023/03/02 14:07:19 by ybenlafk         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,11 +15,11 @@ NAME= philo
 HEADER= philo.h
 
 SRCS= strjoin.c  utilis_1.c utilis.c ft_split.c parsing.c \
-		routine.c	main.c
+		routine.c new_philo.c	main.c
 
 OBGJ= $(SRCS:.c=.o)
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror 
+CFLAGS = -Wall -Wextra -Werror
 FRM = rm -rf
 
 all: $(NAME)

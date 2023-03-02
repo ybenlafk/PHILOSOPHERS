@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 15:13:15 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/02/26 23:40:56 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:14:06 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,29 +51,20 @@ int	list_len(char **s)
 	return (i);
 }
 
-void	fill_philos(t_src *src, t_philo *philos, t_var *vars, int stat)
+void	fill_philos(t_src *src, t_philo **philos, t_var *vars, int stat)
 {
 	int	i;
 
 	i = 0;
 	while (i < src->philos_nb)
 	{
-		philos[i].id = i + 1;
-		philos[i].is = 1;
-		philos[i].ok = 0;
-		philos[i].fork_one = &src->forks[i];
-		philos[i].fork_two = &src->forks[(i + 1) % src->philos_nb];
-		philos[i].src = src;
-		philos[i].vars = vars;
-		philos[i].eat_mode = 0;
-		if (stat)
-		{
-			philos[i].eat_count = 0;
-			philos[i].eat_mode = 1;
-		}
-		pthread_create(&philos[i].thd, NULL, routine, (void *)&philos[i]);
+		if (!i)
+			*philos = new_philo(i + 1, src, vars, stat);
+		else
+			ft_lstadd_back(philos, new_philo(i + 1, src, vars, stat));
 		i++;
 	}
+	ft_lstlast(*philos)->next = (*philos);
 }
 
 int	parsing(int ac, char **av, t_src *src)
@@ -90,17 +81,17 @@ int	parsing(int ac, char **av, t_src *src)
 		return (freedom(p.str), 1);
 	src->len = list_len(p.str);
 	if (src->len < 4 || src->len > 5)
-		return (1);
+		return (freedom(p.str), 1);
 	src->philos_nb = ft_atoi(p.str[0]);
 	if (src->philos_nb <= 0 || src->time_to_die < 0
 		|| src->time_to_eat < 0 || src->time_to_sleep < 0
 		|| src->philos_nb > 10000)
-		return (1);
+		return (freedom(p.str), 1);
 	if (src_init(src, &p))
-		return (1);
+		return (freedom(p.str), 1);
 	if (src->time_to_die <= 0
 		|| src->time_to_eat <= 0 || src->time_to_sleep <= 0)
-		return (1);
+		return (freedom(p.str), 1);
 	freedom(p.str);
 	return (0);
 }

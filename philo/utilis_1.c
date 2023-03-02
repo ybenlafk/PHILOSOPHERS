@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 21:15:04 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/02/26 23:48:23 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:10:44 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,49 @@ int	src_init(t_src *src, t_var *p)
 
 void	ft_usleep(long long time)
 {
-	long long start;
+	long long	start;
 
 	start = get_time();
-	while (get_time() - start <= time)
-		usleep (1000);
+	while (get_time() - start < time)
+		usleep (150);
+}
+
+void	created_philos(t_philo *philo, t_src *src, t_var *vars)
+{
+	int	i;
+
+	vars->time = get_time();
+	i = 0;
+	while (i < src->philos_nb)
+	{
+		if (pthread_create(&vars->threads, NULL, routine, philo))
+			return ;
+		usleep(10);
+		i++;
+		philo = philo->next;
+	}
+}
+
+void	list_free(t_philo **philos, int len)
+{
+	t_philo	*tmp;
+
+	while (len--)
+	{
+		tmp = (*philos);
+		*philos = (*philos)->next;
+		free(tmp);
+	}
+}
+
+void	eat_counter(t_philo *philos)
+{
+	if (philos->eat_mode)
+	{
+		pthread_mutex_lock(&philos->vars->lock);
+		philos->eat_count++;
+		if (philos->eat_count == philos->src->times_philos_must_eat)
+			philos->vars->rep++;
+		pthread_mutex_unlock(&philos->vars->lock);
+	}
 }
