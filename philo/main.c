@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 14:20:12 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/02 15:15:42 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/04 01:44:24 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,19 +74,14 @@ int	main(int ac, char **av)
 	t_src	src;
 	t_philo	*philos;
 
+	if (ac == 1)
+		return(0);
 	vars.i = 0;
 	vars.rep = 0;
 	vars.time = get_time();
 	philos = NULL;
 	if (parsing(ac, av, &src))
 		return (printf("Bad arguments\n"), 1);
-	if (src.philos_nb <= 1)
-	{
-		printf("%lld %d has taken a fork\n", get_time() - vars.time, 1);
-		ft_usleep(src.time_to_die);
-		printf("%lld %d died\n", get_time() - vars.time, 1);
-		return (0);
-	}
 	threads_creator(&src, philos, &vars);
 	return (0);
 }
