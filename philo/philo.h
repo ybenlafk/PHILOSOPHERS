@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/11 20:58:46 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/02 14:05:21 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/08 11:21:50 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,13 @@ typedef struct var
 	char			**str;
 	int				i;
 	int				rep;
+	int				ok;
 	int				is;
 	int				len;
 	int				idd;
 	long long		time;
 	long long		time_after_eat;
-	pthread_t		threads;
+	pthread_t		threads[10000];
 	pthread_mutex_t	lock;
 	pthread_mutex_t	ls;
 	pthread_mutex_t	lss;

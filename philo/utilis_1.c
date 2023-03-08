@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 21:15:04 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/02 14:10:44 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:45:38 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,8 @@ void	created_philos(t_philo *philo, t_src *src, t_var *vars)
 	i = 0;
 	while (i < src->philos_nb)
 	{
-		if (pthread_create(&vars->threads, NULL, routine, philo))
+		if (pthread_create(&vars->threads[i], NULL, routine, philo))
 			return ;
-		usleep(10);
 		i++;
 		philo = philo->next;
 	}

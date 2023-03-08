@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 16:01:19 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/02 14:09:27 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/08 11:32:07 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,26 +14,22 @@
 
 void	writeline(t_philo *philos, char *s)
 {
-	pthread_mutex_t	lock;
-
-	pthread_mutex_init(&lock, NULL);
 	pthread_mutex_lock(&philos->vars->lock);
-	printf("%lld %d %s\n",
-		get_time() - philos->vars->time, philos->id, s);
+	if (philos->ok)
+		printf("%lld %d %s\n", get_time() - philos->vars->time, philos->id, s);
 	pthread_mutex_unlock(&philos->vars->lock);
-	pthread_mutex_destroy(&lock);
 }
 
 void	locked_msg(t_philo *philos, int stat)
-{	
+{
 	if (!stat)
 		writeline(philos, "has taken a fork");
 	else if (stat == 1)
 	{
 		writeline(philos, "is eating");
-		pthread_mutex_lock(&philos->vars->lock);
+		pthread_mutex_lock(&philos->vars->ls);
 		philos->time_after_eat = get_time();
-		pthread_mutex_unlock(&philos->vars->lock);
+		pthread_mutex_unlock(&philos->vars->ls);
 	}
 	else if (stat == 2)
 		writeline(philos, "is sleeping");
@@ -51,24 +47,23 @@ void	lock_forks(t_philo *philo)
 
 void	unlock_forks(t_philo *philo)
 {
-	if (philo->ok)
-	{
-		pthread_mutex_unlock(&philo->fork);
-		pthread_mutex_unlock(&philo->next->fork);
-	}
+	pthread_mutex_unlock(&philo->fork);
+	pthread_mutex_unlock(&philo->next->fork);
 }
 
 void	*routine(void *param)
 {
 	t_philo	*philos;
+	int	i = 1;
 
 	if (!param)
 		return (NULL);
 	philos = (t_philo *)param;
-	pthread_mutex_lock(&philos->vars->lss);
-	while (philos->ok)
+	while (i)
 	{
-		pthread_mutex_unlock(&philos->vars->lss);
+		pthread_mutex_lock(&philos->vars->lock);
+		i = philos->ok;
+		pthread_mutex_unlock(&philos->vars->lock);
 		if (!(philos->id % 2))
 			usleep(100);
 		lock_forks(philos);

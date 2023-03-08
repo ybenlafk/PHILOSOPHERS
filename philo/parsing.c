@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 15:13:15 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/02 15:14:06 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:36:37 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,7 @@ int	parsing(int ac, char **av, t_src *src)
 	if (src->len < 4 || src->len > 5)
 		return (freedom(p.str), 1);
 	src->philos_nb = ft_atoi(p.str[0]);
-	if (src->philos_nb <= 0 || src->time_to_die < 0
-		|| src->time_to_eat < 0 || src->time_to_sleep < 0
-		|| src->philos_nb > 10000)
+	if (src->philos_nb <= 0 || src->philos_nb > 1000)
 		return (freedom(p.str), 1);
 	if (src_init(src, &p))
 		return (freedom(p.str), 1);
