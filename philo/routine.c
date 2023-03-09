@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 16:01:19 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/08 11:32:07 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/08 17:56:38 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,7 @@
 void	writeline(t_philo *philos, char *s)
 {
 	pthread_mutex_lock(&philos->vars->lock);
-	if (philos->ok)
-		printf("%lld %d %s\n", get_time() - philos->vars->time, philos->id, s);
+	printf("%lld %d %s\n", get_time() - philos->vars->time, philos->id, s);
 	pthread_mutex_unlock(&philos->vars->lock);
 }
 
@@ -54,15 +53,16 @@ void	unlock_forks(t_philo *philo)
 void	*routine(void *param)
 {
 	t_philo	*philos;
-	int	i = 1;
+	int		i;
 
+	i = 1;
 	if (!param)
 		return (NULL);
 	philos = (t_philo *)param;
 	while (i)
 	{
 		pthread_mutex_lock(&philos->vars->lock);
-		i = philos->ok;
+		i = philos->vars->ok;
 		pthread_mutex_unlock(&philos->vars->lock);
 		if (!(philos->id % 2))
 			usleep(100);
@@ -75,5 +75,6 @@ void	*routine(void *param)
 		ft_usleep(philos->src->time_to_sleep);
 		locked_msg(philos, 3);
 	}
+	pthread_mutex_unlock(&philos->vars->lock);
 	return (NULL);
 }

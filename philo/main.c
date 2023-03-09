@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/12 14:20:12 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/08 11:36:20 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/08 17:54:31 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,24 +22,17 @@ void	ft_destroy(t_philo *philos, t_src *src, t_var *vars)
 	i = 0;
 	while (i < src->philos_nb)
 	{
-	    pthread_mutex_destroy(&philos->fork);
-	    philos = philos->next;
-	    i++;
-	    if (philos == NULL)
-	        break;
+		pthread_mutex_destroy(&philos->fork);
+		philos = philos->next;
+		i++;
+		if (philos == NULL)
+			break ;
 	}
 	pthread_mutex_destroy(&vars->lock);
 	pthread_mutex_destroy(&vars->ls);
 	pthread_mutex_destroy(&vars->lss);
 }
 
-// void	print_dead(t_philo *philos, t_var *vars)
-// {
-// 	pthread_mutex_lock(&philos->vars->lock);
-// 	printf("%lld %d died\n",
-// 				get_time() - philos->vars->time, philos->id);
-// 	pthread_mutex_unlock(&philos->vars->lock);
-// }
 void	checker(t_src *src, t_philo *philos, t_var *vars)
 {
 	while (1)
@@ -47,26 +40,18 @@ void	checker(t_src *src, t_philo *philos, t_var *vars)
 		pthread_mutex_lock(&vars->ls);
 		if ((get_time() - philos->time_after_eat) > src->time_to_die)
 		{
-			while(philos->ok)
-			{
-				pthread_mutex_lock(&philos->vars->lock);
-				philos->ok = 0;
-				pthread_mutex_unlock(&philos->vars->lock);
-				philos = philos->next;
-			}
+			pthread_mutex_lock(&vars->lock);
+			vars->is = 1;
+			vars->ok = 0;
+			vars->idd = philos->id;
 			pthread_mutex_unlock(&vars->ls);
-			// print_dead(philos, vars);
-			ft_destroy(philos, src, vars);
-			list_free(&philos, src->philos_nb);
-			return ;
+			break ;
 		}
 		if (philos->vars->rep >= src->philos_nb && philos->eat_mode)
 		{
-			philos->ok = 0;
+			philos->vars->ok = 0;
 			pthread_mutex_unlock(&vars->ls);
-			ft_destroy(philos, src, vars);
-			list_free(&philos, src->philos_nb);
-			return ;
+			break ;
 		}
 		pthread_mutex_unlock(&vars->ls);
 		philos = philos->next;
@@ -89,6 +74,10 @@ void	threads_creator(t_src *src, t_philo *philos, t_var *vars)
 	checker(src, philos, vars);
 	while (i < src->philos_nb)
 		pthread_detach(vars->threads[i++]);
+	ft_destroy(philos, src, vars);
+	list_free(&philos, src->philos_nb);
+	if (!vars->ok && vars->is)
+		printf("%lld %d died\n", get_time() - vars->time, vars->idd);
 }
 
 int	main(int ac, char **av)

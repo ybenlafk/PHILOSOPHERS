@@ -6,7 +6,7 @@
 /*   By: ybenlafk <ybenlafk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 21:15:04 by ybenlafk          #+#    #+#             */
-/*   Updated: 2023/03/07 15:45:38 by ybenlafk         ###   ########.fr       */
+/*   Updated: 2023/03/08 14:16:38 by ybenlafk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ void	list_free(t_philo **philos, int len)
 		tmp = (*philos);
 		*philos = (*philos)->next;
 		free(tmp);
+		tmp = NULL;
 	}
 }
 
